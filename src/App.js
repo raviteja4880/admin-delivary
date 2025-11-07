@@ -5,7 +5,7 @@ import DeliveryDashboard from "./pages/DeliveryDashboard";
 import ProfilePage from "./pages/ProfilePage";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import DeliveryAnalytics from "./pages/DeliveryAnalytics";
-import Navbar from "./pages/Navbar";
+import Navbar from "./components/Navbar";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -34,7 +34,7 @@ function App() {
         )}
 
         {/* Redirect any unknown route */}
-        <Route path="*" element={<Navigate to={isLoggedIn ? "/profile" : "/"} />} />
+          <Route path="*" element={<Navigate to={isLoggedIn ? "/profile" : "/"} />} />
       </Routes>
     </BrowserRouter>
   );

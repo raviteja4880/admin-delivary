@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, LineChart, Line } from "recharts";
 import { adminAPI } from "../services/api";
 import { IndianRupee, ShoppingBag, TrendingUp } from "lucide-react";
-import DashboardNavbar from "../pages/Navbar";
+import DashboardNavbar from "../components/Navbar";
 
 const AdminAnalytics = () => {
   const [orders, setOrders] = useState([]);

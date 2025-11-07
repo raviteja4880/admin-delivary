@@ -11,17 +11,13 @@ const API = axios.create({
 
 // ----------------- Attach JWT token automatically -----------------
 API.interceptors.request.use((req) => {
-  const storedUser = JSON.parse(localStorage.getItem("userInfo"));
-  const storedToken = localStorage.getItem("token");
-
-  const token = storedUser?.token || storedToken;
-
-  if (token) {
-    req.headers.Authorization = `Bearer ${token}`;
-  } else {
-    console.warn("No auth token found in localStorage");
+  try {
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const token = userInfo?.token;
+    if (token) req.headers.Authorization = `Bearer ${token}`;
+  } catch {
+    console.warn("Invalid userInfo in localStorage");
   }
-
   return req;
 });
 
@@ -29,7 +25,8 @@ API.interceptors.request.use((req) => {
 export const authAPI = {
   login: (payload) => API.post("/auth/login", payload),
   register: (payload) => API.post("/auth/register", payload),
-  profile: () => API.get("/auth/profile"),
+  getProfile: () => API.get("/auth/profile"),
+  updateProfile: (data) => API.put("/auth/profile", data),
 };
 
 // ================= PRODUCTS API =================
@@ -69,21 +66,16 @@ export const paymentAPI = {
 
 // ================= ADMIN API =================
 export const adminAPI = {
-  // Get all orders (with user + delivery info)
   getAllOrders: () => API.get("/admin/orders"),
-  // Assign delivery partner to order
   assignDelivery: (orderId, deliveryPartnerId) =>
     API.put(`/admin/orders/${orderId}/assign`, { deliveryPartnerId }),
-  // Manage delivery partners
   getDeliveryPartners: () => API.get("/admin/delivery"),
   addDeliveryPartner: (payload) => API.post("/admin/delivery", payload),
 };
 
 // ================= DELIVERY API =================
 export const deliveryAPI = {
-  // Get all orders assigned to the delivery partner
   getMyOrders: () => API.get("/delivery/my-orders"),
-  // Mark specific order as delivered
   markDelivered: (orderId) => API.put(`/delivery/${orderId}/deliver`),
 };
 

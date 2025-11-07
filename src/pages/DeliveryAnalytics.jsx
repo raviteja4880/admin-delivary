@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { deliveryAPI } from "../services/api";
 import { CheckCircle, XCircle, CalendarCheck, Truck } from "lucide-react";
-import DashboardNavbar from "../pages/Navbar";
+import DashboardNavbar from "../components/Navbar";
 
 const DeliveryAnalytics = () => {
   const [orders, setOrders] = useState([]);

@@ -1,13 +1,7 @@
 // src/components/DashboardNavbar.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  User,
-  LogOut,
-  Truck,
-  BarChart3,
-  UserCircle,
-} from "lucide-react";
+import { User, LogOut, Truck, BarChart3, UserCircle } from "lucide-react";
 
 const DashboardNavbar = () => {
   const navigate = useNavigate();
@@ -15,7 +9,7 @@ const DashboardNavbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Detect outside clicks to close dropdown
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -30,24 +24,24 @@ const DashboardNavbar = () => {
   const handleLogout = () => {
     localStorage.removeItem("userInfo");
     localStorage.removeItem("token");
-    navigate("/login");
+    navigate("/");
   };
 
   // Role-based links
   const role = userInfo?.role;
 
-    const navLinks =
+  const navLinks =
     role === "admin"
-        ? [
-    -       { to: "/admin/dashboard", label: "Dashboard", icon: <BarChart3 size={18} /> },
-    +       { to: "/admin/analytics", label: "Analytics", icon: <BarChart3 size={18} /> },
+      ? [
+          { to: "/admin/analytics", label: "Analytics", icon: <BarChart3 size={18} /> },
+          { to: "/admin/dashboard", label: "Orders", icon: <BarChart3 size={18} /> },
         ]
-        : role === "delivery"
-        ? [
-    -       { to: "/delivery/dashboard", label: "Dashboard", icon: <Truck size={18} /> },
-    +       { to: "/delivery/analytics", label: "Analytics", icon: <Truck size={18} /> },
+      : role === "delivery"
+      ? [
+          { to: "/delivery/analytics", label: "Analytics", icon: <Truck size={18} /> },
+          { to: "/delivery/dashboard", label: "Deliveries", icon: <Truck size={18} /> },
         ]
-        : [];
+      : [];
 
   return (
     <nav
