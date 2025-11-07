@@ -6,13 +6,13 @@ import { useNavigate } from "react-router-dom";
 
 const AuthLanding = () => {
   const [activeTab, setActiveTab] = useState("login");
-  const [role, setRole] = useState("admin");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
   });
@@ -34,21 +34,17 @@ const AuthLanding = () => {
       const userRole = data.user?.role || data.role;
 
       if (userRole === "admin") {
-        alert("Welcome back, Admin!");
+        toast.success("Welcome back, Admin!");
         navigate("/admin/dashboard");
       } else if (userRole === "delivery") {
-        alert("Welcome back, Delivery Partner!");
+        toast.success("Welcome back, Delivery Partner!");
         navigate("/delivery/dashboard");
       } else {
         toast.error("Access denied — not an admin or delivery partner.");
       }
-
-      toast.success("Login successful!");
     } catch (err) {
       console.error("Login error:", err);
-      const errorMessage =
-        err.response?.data?.message || "Invalid credentials. Please try again.";
-      alert(errorMessage); 
+      toast.error(err.response?.data?.message || "Invalid credentials.");
     } finally {
       setLoading(false);
     }
@@ -59,7 +55,13 @@ const AuthLanding = () => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords do not match ❌");
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    // Validate phone number
+    if (!/^[6-9]\d{9}$/.test(formData.phone)) {
+      alert("Please enter a valid 10-digit mobile number starting with 6–9");
       return;
     }
 
@@ -68,19 +70,19 @@ const AuthLanding = () => {
       await authAPI.register({
         name: formData.name,
         email: formData.email,
+        phone: formData.phone,
         password: formData.password,
-        role,
+        role: "delivery", 
       });
 
-      toast.success("Registration successful! Please login.");
-      alert("🎉 Registration successful! You can now login.");
+      alert("Registration successful! You can now login as a Delivery Partner.");
       setActiveTab("login");
     } catch (err) {
       console.error("Register error:", err);
-      const errorMessage =
+      alert(
         err.response?.data?.message ||
-        "Registration failed. Please try again later.";
-      alert(errorMessage); 
+          "Registration failed. Please try again later."
+      );
     } finally {
       setLoading(false);
     }
@@ -132,28 +134,6 @@ const AuthLanding = () => {
             backdropFilter: "blur(12px)",
           }}
         >
-          {/* Role Selector (Register only) */}
-          {activeTab === "register" && (
-            <div className="d-flex justify-content-center gap-3 mb-3">
-              <button
-                className={`btn btn-sm ${
-                  role === "admin" ? "btn-primary" : "btn-outline-primary"
-                }`}
-                onClick={() => setRole("admin")}
-              >
-                Admin
-              </button>
-              <button
-                className={`btn btn-sm ${
-                  role === "delivery" ? "btn-primary" : "btn-outline-primary"
-                }`}
-                onClick={() => setRole("delivery")}
-              >
-                Delivery Partner
-              </button>
-            </div>
-          )}
-
           {/* Animated Forms */}
           <AnimatePresence mode="wait">
             {activeTab === "login" ? (
@@ -214,7 +194,7 @@ const AuthLanding = () => {
                 transition={{ duration: 0.3 }}
                 onSubmit={handleRegister}
               >
-                <h4 className="text-center mb-4">Create Account</h4>
+                <h4 className="text-center mb-4">Delivery Partner Registration</h4>
 
                 <div className="mb-3">
                   <label>Full Name</label>
@@ -241,6 +221,22 @@ const AuthLanding = () => {
                     }
                     placeholder="Enter your email"
                     required
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label>Phone Number</label>
+                  <input
+                    type="tel"
+                    className="form-control"
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
+                    placeholder="Enter your 10-digit mobile number"
+                    required
+                    pattern="[6-9][0-9]{9}"
+                    title="Enter a valid 10-digit number starting with 6–9"
                   />
                 </div>
 
@@ -277,10 +273,10 @@ const AuthLanding = () => {
 
                 <button
                   type="submit"
-                  className="btn btn-primary w-100"
+                  className="btn btn-success w-100"
                   disabled={loading}
                 >
-                  {loading ? "Registering..." : "Register"}
+                  {loading ? "Registering..." : "Register as Delivery Partner"}
                 </button>
               </motion.form>
             )}
