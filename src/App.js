@@ -26,9 +26,9 @@ function App() {
         {isLoggedIn && (
           <>
             <Route path="/profile" element={<><Navbar /><ProfilePage /></>} />
-            <Route path="/admin/analytics" element={<><Navbar /><AdminAnalytics /></>} />
+            <Route path="/admin/analytics" element={<><AdminAnalytics /></>} />
             <Route path="/admin/dashboard" element={<><Navbar /><AdminOrders /></>} />
-            <Route path="/delivery/analytics" element={<><Navbar /><DeliveryAnalytics /></>} />
+            <Route path="/delivery/analytics" element={<><DeliveryAnalytics /></>} />
             <Route path="/delivery/dashboard" element={<><Navbar /><DeliveryDashboard /></>} />
           </>
         )}
