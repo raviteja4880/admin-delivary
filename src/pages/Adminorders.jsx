@@ -63,8 +63,7 @@ const loadData = async () => {
 
   return (
     <div className="container py-4">
-      {/* HEADER */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
+=      <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="fw-semibold text-dark d-flex align-items-center gap-2">
           <BarChart3 size={26} className="text-primary" />
           Manage Orders
