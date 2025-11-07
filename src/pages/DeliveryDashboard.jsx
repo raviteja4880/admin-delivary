@@ -12,6 +12,8 @@ import {
   IndianRupee,
   Phone,
   ExternalLink,
+  CreditCard,
+  Wallet,
 } from "lucide-react";
 import "../DeliveryDashboard.css";
 
@@ -46,6 +48,18 @@ const DeliveryDashboard = () => {
     }
   };
 
+  // COD payment confirmation
+  const markPaid = async (orderId) => {
+    if (!window.confirm("Confirm COD payment received?")) return;
+    try {
+      await deliveryAPI.markPaid(orderId);
+      await fetchOrders();
+    } catch (error) {
+      console.error("Error marking order as paid:", error);
+      alert("Failed to update payment status.");
+    }
+  };
+
   if (loading)
     return (
       <div className="d-flex justify-content-center align-items-center vh-100 text-secondary">
@@ -75,7 +89,7 @@ const DeliveryDashboard = () => {
         </button>
       </div>
 
-      {/* STATS CARDS */}
+      {/* STATS */}
       <div className="row g-3 mb-4">
         <div className="col-md-4 d-flex">
           <div className="card border-start border-primary border-4 shadow-sm flex-fill">
@@ -123,6 +137,7 @@ const DeliveryDashboard = () => {
                 <th>Customer Info</th>
                 <th>Address</th>
                 <th>Total</th>
+                <th className="text-center">Payment</th>
                 <th className="text-center">Delivered</th>
                 <th className="text-center">Action</th>
               </tr>
@@ -131,7 +146,7 @@ const DeliveryDashboard = () => {
               {orders.length > 0 ? (
                 orders.map((order) => (
                   <tr key={order._id}>
-                    {/* Customer Info (Name + Mobile) */}
+                    {/* Customer Info */}
                     <td className="align-middle">
                       <div className="d-flex flex-column">
                         <div className="d-flex align-items-center gap-2">
@@ -145,7 +160,7 @@ const DeliveryDashboard = () => {
                       </div>
                     </td>
 
-                    {/* Address with Google Maps link */}
+                    {/* Address */}
                     <td className="align-middle">
                       <div className="d-flex align-items-start gap-2">
                         <MapPin size={16} className="text-muted mt-1" />
@@ -180,7 +195,27 @@ const DeliveryDashboard = () => {
                       </div>
                     </td>
 
-                    {/* Delivered */}
+                    {/* Payment Status */}
+                    <td className="text-center align-middle">
+                      {order.isPaid ? (
+                        <span className="text-success d-flex justify-content-center align-items-center gap-1">
+                          <CreditCard size={16} /> Paid
+                        </span>
+                      ) : order.paymentMethod === "COD" ? (
+                        <button
+                          onClick={() => markPaid(order._id)}
+                          className="btn btn-sm btn-warning d-flex align-items-center gap-1 mx-auto"
+                        >
+                          <Wallet size={16} /> Mark as Paid
+                        </button>
+                      ) : (
+                        <span className="text-danger d-flex justify-content-center align-items-center gap-1">
+                          <XCircle size={16} /> Unpaid
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Delivery Status */}
                     <td className="text-center align-middle">
                       {order.isDelivered ? (
                         <CheckCircle size={20} className="text-success" />
@@ -189,12 +224,13 @@ const DeliveryDashboard = () => {
                       )}
                     </td>
 
-                    {/* Action */}
+                    {/* Actions */}
                     <td className="text-center align-middle">
                       {!order.isDelivered && (
                         <button
                           onClick={() => markDelivered(order._id)}
                           className="btn btn-success btn-sm d-flex align-items-center gap-1 mx-auto"
+                          disabled={order.paymentMethod === "COD" && !order.isPaid} 
                         >
                           <CheckCircle size={16} />
                           Mark Delivered
@@ -205,7 +241,7 @@ const DeliveryDashboard = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="text-center text-muted py-4">
+                  <td colSpan="6" className="text-center text-muted py-4">
                     No assigned deliveries yet.
                   </td>
                 </tr>

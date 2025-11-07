@@ -76,7 +76,9 @@ export const adminAPI = {
 // ================= DELIVERY API =================
 export const deliveryAPI = {
   getMyOrders: () => API.get("/delivery/my-orders"),
-  markDelivered: (orderId) => API.put(`/delivery/${orderId}/deliver`),
+  markDelivered: (id) => API.put(`/delivery/${id}/deliver`),
+  markPaid: (id) => API.put(`/delivery/${id}/mark-paid`),
 };
+
 
 export { API };

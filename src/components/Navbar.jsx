@@ -1,4 +1,3 @@
-// src/components/DashboardNavbar.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { User, LogOut, Truck, BarChart3, UserCircle } from "lucide-react";
@@ -33,13 +32,29 @@ const DashboardNavbar = () => {
   const navLinks =
     role === "admin"
       ? [
-          { to: "/admin/analytics", label: "Analytics", icon: <BarChart3 size={18} /> },
-          { to: "/admin/dashboard", label: "Orders", icon: <BarChart3 size={18} /> },
+          {
+            to: "/admin/analytics",
+            label: "Analytics",
+            icon: <BarChart3 size={18} />,
+          },
+          {
+            to: "/admin/dashboard",
+            label: "Orders",
+            icon: <BarChart3 size={18} />,
+          },
         ]
       : role === "delivery"
       ? [
-          { to: "/delivery/analytics", label: "Analytics", icon: <Truck size={18} /> },
-          { to: "/delivery/dashboard", label: "Deliveries", icon: <Truck size={18} /> },
+          {
+            to: "/delivery/analytics",
+            label: "Analytics",
+            icon: <Truck size={18} />,
+          },
+          {
+            to: "/delivery/dashboard",
+            label: "Deliveries",
+            icon: <Truck size={18} />,
+          },
         ]
       : [];
 
@@ -52,8 +67,17 @@ const DashboardNavbar = () => {
       }}
     >
       <div className="container">
-        {/* BRAND */}
-        <Link to="/" className="navbar-brand fw-bold text-primary">
+        {/* BRAND LINK — redirect by role */}
+        <Link
+          to={
+            userInfo?.role === "admin"
+              ? "/admin/analytics"
+              : userInfo?.role === "delivery"
+              ? "/delivery/analytics"
+              : "/profile"
+          }
+          className="navbar-brand fw-bold text-primary"
+        >
           TejaCommerce
         </Link>
 
