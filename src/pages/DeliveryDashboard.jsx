@@ -10,8 +10,10 @@ import {
   RefreshCw,
   User,
   IndianRupee,
+  Phone,
+  ExternalLink,
 } from "lucide-react";
-import "../DeliveryDashboard.css"; 
+import "../DeliveryDashboard.css";
 
 const DeliveryDashboard = () => {
   const [orders, setOrders] = useState([]);
@@ -92,9 +94,7 @@ const DeliveryDashboard = () => {
             <div className="card-body d-flex justify-content-between align-items-center">
               <div>
                 <p className="text-muted mb-1">Delivered</p>
-                <h4 className="fw-bold text-success mb-0">
-                  {deliveredOrders}
-                </h4>
+                <h4 className="fw-bold text-success mb-0">{deliveredOrders}</h4>
               </div>
               <CheckCircle size={32} className="text-success" />
             </div>
@@ -120,7 +120,7 @@ const DeliveryDashboard = () => {
           <table className="table align-middle table-hover table-bordered mb-0">
             <thead className="table-light">
               <tr>
-                <th>Customer</th>
+                <th>Customer Info</th>
                 <th>Address</th>
                 <th>Total</th>
                 <th className="text-center">Delivered</th>
@@ -128,66 +128,89 @@ const DeliveryDashboard = () => {
               </tr>
             </thead>
             <tbody>
-  {orders.length > 0 ? (
-    orders.map((order) => (
-      <tr key={order._id}>
-        {/* Customer */}
-        <td className="align-middle">
-          <div className="d-flex align-items-center gap-2">
-            <User size={16} className="text-secondary" />
-            <span>{order.user?.name || "Unknown"}</span>
-          </div>
-        </td>
+              {orders.length > 0 ? (
+                orders.map((order) => (
+                  <tr key={order._id}>
+                    {/* Customer Info (Name + Mobile) */}
+                    <td className="align-middle">
+                      <div className="d-flex flex-column">
+                        <div className="d-flex align-items-center gap-2">
+                          <User size={16} className="text-secondary" />
+                          <strong>{order.user?.name || "Unknown"}</strong>
+                        </div>
+                        <div className="d-flex align-items-center gap-2 mt-1 text-muted small">
+                          <Phone size={14} />
+                          <span>{order.mobile || "No phone available"}</span>
+                        </div>
+                      </div>
+                    </td>
 
-        {/* Address */}
-        <td className="align-middle">
-          <div className="d-flex align-items-center gap-2">
-            <MapPin size={16} className="text-muted" />
-            <span className="text-truncate" style={{ maxWidth: "200px" }}>
-              {order.shippingAddress || "No address"}
-            </span>
-          </div>
-        </td>
+                    {/* Address with Google Maps link */}
+                    <td className="align-middle">
+                      <div className="d-flex align-items-start gap-2">
+                        <MapPin size={16} className="text-muted mt-1" />
+                        <div>
+                          <span style={{ maxWidth: "260px", wordBreak: "break-word" }}>
+                            {order.shippingAddress || "No address provided"}
+                          </span>
+                          {order.shippingAddress && (
+                            <div>
+                              <a
+                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                                  order.shippingAddress
+                                )}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary small d-inline-flex align-items-center mt-1"
+                              >
+                                <ExternalLink size={12} className="me-1" />
+                                View on Maps
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </td>
 
-        {/* Total */}
-        <td className="align-middle text-nowrap fw-medium">
-          <div className="d-flex align-items-center gap-1">
-            <IndianRupee size={14} className="text-muted" />
-            <span>{order.totalPrice?.toFixed(2)}</span>
-          </div>
-        </td>
+                    {/* Total */}
+                    <td className="align-middle text-nowrap fw-medium">
+                      <div className="d-flex align-items-center gap-1">
+                        <IndianRupee size={14} className="text-muted" />
+                        <span>{order.totalPrice?.toFixed(2)}</span>
+                      </div>
+                    </td>
 
-        {/* Delivered */}
-        <td className="text-center align-middle">
-          {order.isDelivered ? (
-            <CheckCircle size={20} className="text-success" />
-          ) : (
-            <XCircle size={20} className="text-danger" />
-          )}
-        </td>
+                    {/* Delivered */}
+                    <td className="text-center align-middle">
+                      {order.isDelivered ? (
+                        <CheckCircle size={20} className="text-success" />
+                      ) : (
+                        <XCircle size={20} className="text-danger" />
+                      )}
+                    </td>
 
-        {/* Action */}
-        <td className="text-center align-middle">
-          {!order.isDelivered && (
-            <button
-              onClick={() => markDelivered(order._id)}
-              className="btn btn-success btn-sm d-flex align-items-center gap-1 mx-auto"
-            >
-              <CheckCircle size={16} />
-              Mark Delivered
-            </button>
-          )}
-        </td>
-      </tr>
-    ))
-  ) : (
-    <tr>
-      <td colSpan="5" className="text-center text-muted py-4">
-        No assigned deliveries yet.
-      </td>
-    </tr>
-  )}
-</tbody>
+                    {/* Action */}
+                    <td className="text-center align-middle">
+                      {!order.isDelivered && (
+                        <button
+                          onClick={() => markDelivered(order._id)}
+                          className="btn btn-success btn-sm d-flex align-items-center gap-1 mx-auto"
+                        >
+                          <CheckCircle size={16} />
+                          Mark Delivered
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="text-center text-muted py-4">
+                    No assigned deliveries yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
           </table>
         </div>
       </div>

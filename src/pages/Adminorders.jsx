@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { adminAPI } from "../services/api";
 import {
   CheckCircle,
@@ -10,34 +10,40 @@ import {
   ClipboardCheck,
   PackageOpen,
   BarChart3,
+  Lock,
+  CreditCard,
+  Clock,
+  Filter,
+  ArrowUpDown,
 } from "lucide-react";
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [partners, setPartners] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
 
   useEffect(() => {
     loadData();
   }, []);
 
-const loadData = async () => {
-  setLoading(true);
-  try {
-    const [ordersRes, partnersRes] = await Promise.all([
-      adminAPI.getAllOrders(),
-      adminAPI.getDeliveryPartners(),
-    ]);
-    setOrders(ordersRes.data);
-    setPartners(partnersRes.data);
-  } catch (error) {
-    console.error("Error loading data:", error);
-    alert("Failed to load admin data. Check backend connectivity.");
-  } finally {
-    setLoading(false);
-  }
-};
-
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [ordersRes, partnersRes] = await Promise.all([
+        adminAPI.getAllOrders(),
+        adminAPI.getDeliveryPartners(),
+      ]);
+      setOrders(ordersRes.data);
+      setPartners(partnersRes.data);
+    } catch (error) {
+      console.error("Error loading data:", error);
+      alert("Failed to load admin data. Check backend connectivity.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAssign = async (orderId, partnerId) => {
     try {
@@ -48,6 +54,53 @@ const loadData = async () => {
       alert("Assignment failed. Please try again.");
     }
   };
+
+  // ========== FILTER & SORT LOGIC ==========
+  const filteredOrders = useMemo(() => {
+    let filtered = [...orders];
+
+    switch (filter) {
+      case "paid":
+        filtered = filtered.filter((o) => o.isPaid);
+        break;
+      case "unpaid":
+        filtered = filtered.filter((o) => !o.isPaid);
+        break;
+      case "delivered":
+        filtered = filtered.filter((o) => o.isDelivered);
+        break;
+      case "pending":
+        filtered = filtered.filter((o) => !o.isDelivered);
+        break;
+      case "assigned":
+        filtered = filtered.filter((o) => !!o.assignedTo);
+        break;
+      default:
+        break;
+    }
+
+    switch (sortBy) {
+      case "oldest":
+        filtered.sort(
+          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+        break;
+      case "priceHigh":
+        filtered.sort((a, b) => b.totalPrice - a.totalPrice);
+        break;
+      case "priceLow":
+        filtered.sort((a, b) => a.totalPrice - b.totalPrice);
+        break;
+      default:
+        // newest
+        filtered.sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        break;
+    }
+
+    return filtered;
+  }, [orders, filter, sortBy]);
 
   if (loading)
     return (
@@ -63,7 +116,8 @@ const loadData = async () => {
 
   return (
     <div className="container py-4">
-        <div className="d-flex justify-content-between align-items-center mb-4">
+      {/* HEADER */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="fw-semibold text-dark d-flex align-items-center gap-2">
           <BarChart3 size={26} className="text-primary" />
           Manage Orders
@@ -116,6 +170,40 @@ const loadData = async () => {
         </div>
       </div>
 
+      {/* FILTER & SORT BAR */}
+      <div className="card shadow-sm border-0 mb-3 p-3">
+        <div className="row g-2 align-items-center">
+          <div className="col-md-6 d-flex align-items-center gap-2">
+            <Filter size={18} className="text-primary" />
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="form-select"
+            >
+              <option value="all">All Orders</option>
+              <option value="paid">Paid</option>
+              <option value="unpaid">Unpaid</option>
+              <option value="delivered">Delivered</option>
+              <option value="pending">Pending</option>
+              <option value="assigned">Assigned</option>
+            </select>
+          </div>
+          <div className="col-md-6 d-flex align-items-center gap-2">
+            <ArrowUpDown size={18} className="text-secondary" />
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="form-select"
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="priceHigh">Price: High → Low</option>
+              <option value="priceLow">Price: Low → High</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       {/* ORDERS TABLE */}
       <div className="card shadow-sm border-0">
         <div className="table-responsive">
@@ -124,79 +212,101 @@ const loadData = async () => {
               <tr>
                 <th>Customer</th>
                 <th>Total</th>
-                <th className="text-center">Paid</th>
+                <th className="text-center">Payment</th>
                 <th className="text-center">Delivered</th>
                 <th className="text-center">Delivery Partner</th>
                 <th className="text-center">Action</th>
               </tr>
             </thead>
             <tbody>
-              {orders.length > 0 ? (
-                orders.map((order) => (
-                  <tr key={order._id}>
-                    <td className="d-flex align-items-center gap-2">
-                      <User size={16} className="text-secondary" />
-                      {order.user?.name || "Unknown"}
-                    </td>
-                    <td className="fw-medium">
-                      <IndianRupee size={14} className="text-muted me-1" />
-                      {order.totalPrice}
-                    </td>
-                    <td className="text-center">
-                      {order.isPaid ? (
-                        <CheckCircle
-                          size={20}
-                          className="text-success"
-                          title="Paid"
-                        />
-                      ) : (
-                        <XCircle size={20} className="text-danger" title="Unpaid" />
-                      )}
-                    </td>
-                    <td className="text-center">
-                      {order.isDelivered ? (
-                        <CheckCircle
-                          size={20}
-                          className="text-success"
-                          title="Delivered"
-                        />
-                      ) : (
-                        <XCircle
-                          size={20}
-                          className="text-danger"
-                          title="Pending"
-                        />
-                      )}
-                    </td>
-                    <td className="text-center">
-                      <select
-                        value={order.assignedTo?._id || ""}
-                        onChange={(e) => handleAssign(order._id, e.target.value)}
-                        className="form-select form-select-sm"
-                      >
-                        <option value="">-- Assign --</option>
-                        {partners.map((p) => (
-                          <option key={p._id} value={p._id}>
-                            {p.name}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="text-center">
-                      <button
-                        onClick={loadData}
-                        className="btn btn-outline-primary btn-sm rounded-circle"
-                        title="Refresh"
-                      >
-                        <RefreshCw size={16} />
-                      </button>
-                    </td>
-                  </tr>
-                ))
+              {filteredOrders.length > 0 ? (
+                filteredOrders.map((order) => {
+                  const isAssigned = !!order.assignedTo;
+
+                  return (
+                    <tr key={order._id}>
+                      {/* Customer */}
+                      <td className="d-flex align-items-center gap-2">
+                        <User size={16} className="text-secondary" />
+                        {order.user?.name || "Unknown"}
+                      </td>
+
+                      {/* Total */}
+                      <td className="fw-medium">
+                        <IndianRupee size={14} className="text-muted me-1" />
+                        {order.totalPrice?.toFixed(2)}
+                      </td>
+
+                      {/* Payment */}
+                      <td className="text-center">
+                        {order.isPaid ? (
+                          <span className="badge bg-success d-flex justify-content-center align-items-center gap-1">
+                            <CreditCard size={14} />
+                            Paid
+                          </span>
+                        ) : (
+                          <span className="badge bg-warning text-dark d-flex justify-content-center align-items-center gap-1">
+                            <Clock size={14} />
+                            Pending
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Delivered */}
+                      <td className="text-center">
+                        {order.isDelivered ? (
+                          <span className="badge bg-success d-flex justify-content-center align-items-center gap-1">
+                            <CheckCircle size={14} />
+                            Delivered
+                          </span>
+                        ) : (
+                          <span className="badge bg-danger d-flex justify-content-center align-items-center gap-1">
+                            <XCircle size={14} />
+                            Pending
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Partner */}
+                      <td className="text-center">
+                        {isAssigned ? (
+                          <div className="d-flex justify-content-center align-items-center gap-2 text-muted">
+                            <span>{order.assignedTo?.name || "Assigned"}</span>
+                            <Lock size={16} className="text-secondary" />
+                          </div>
+                        ) : (
+                          <select
+                            value={order.assignedTo?._id || ""}
+                            onChange={(e) => handleAssign(order._id, e.target.value)}
+                            className="form-select form-select-sm"
+                          >
+                            <option value="">-- Assign --</option>
+                            {partners.map((p) => (
+                              <option key={p._id} value={p._id}>
+                                {p.name}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </td>
+
+                      {/* Refresh */}
+                      <td className="text-center">
+                        <button
+                          onClick={loadData}
+                          className="btn btn-outline-primary btn-sm rounded-circle"
+                          title="Refresh"
+                        >
+                            <RefreshCw size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan="6" className="text-center text-muted py-4">
-                    No orders found
+                    No matching orders found
                   </td>
                 </tr>
               )}
