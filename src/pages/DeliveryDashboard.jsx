@@ -15,12 +15,14 @@ import {
   CreditCard,
   Wallet,
 } from "lucide-react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "../DeliveryDashboard.css";
 
 const DeliveryDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [updatingId, setUpdatingId] = useState(null); // For button loading state
+  const [updatingId, setUpdatingId] = useState(null);
 
   useEffect(() => {
     fetchOrders();
@@ -33,7 +35,7 @@ const DeliveryDashboard = () => {
       setOrders(data);
     } catch (error) {
       console.error("Error fetching delivery orders:", error);
-      alert("Failed to fetch orders. Check your backend connection.");
+      toast.error("Failed to fetch orders. Check backend connection.");
     } finally {
       setLoading(false);
     }
@@ -49,9 +51,10 @@ const DeliveryDashboard = () => {
           o._id === orderId ? { ...o, isDelivered: true } : o
         )
       );
+      toast.success(" Order marked as delivered");
     } catch (error) {
-      console.error("Error marking order delivered:", error);
-      alert("Failed to update delivery status.");
+      console.error("Error marking delivered:", error);
+      toast.error("Failed to update delivery status.");
     } finally {
       setUpdatingId(null);
     }
@@ -68,9 +71,10 @@ const DeliveryDashboard = () => {
           o._id === orderId ? { ...o, isPaid: true } : o
         )
       );
+      toast.success(" COD payment confirmed");
     } catch (error) {
-      console.error("Error marking order as paid:", error);
-      alert("Failed to update payment status.");
+      console.error("Error marking as paid:", error);
+      toast.error("Failed to mark as paid.");
     } finally {
       setUpdatingId(null);
     }
@@ -90,6 +94,8 @@ const DeliveryDashboard = () => {
 
   return (
     <div className="container py-4">
+      <ToastContainer position="top-right" autoClose={3000} />
+
       {/* HEADER */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="fw-semibold text-dark d-flex align-items-center gap-2">
@@ -213,19 +219,27 @@ const DeliveryDashboard = () => {
 
                     {/* Payment */}
                     <td className="text-center align-middle">
-                      {order.isPaid ? (
+                      {order.paymentMethod === "COD" ? (
+                        order.isPaid ? (
+                          <span className="text-success d-flex justify-content-center align-items-center gap-1">
+                            <CreditCard size={16} /> Paid
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => markPaid(order._id)}
+                            disabled={updatingId === order._id}
+                            className="btn btn-sm btn-warning d-flex align-items-center gap-1 mx-auto"
+                          >
+                            <Wallet size={16} />
+                            {updatingId === order._id
+                              ? "Updating..."
+                              : "Mark as Paid"}
+                          </button>
+                        )
+                      ) : order.isPaid ? (
                         <span className="text-success d-flex justify-content-center align-items-center gap-1">
                           <CreditCard size={16} /> Paid
                         </span>
-                      ) : order.paymentMethod === "COD" ? (
-                        <button
-                          onClick={() => markPaid(order._id)}
-                          disabled={updatingId === order._id}
-                          className="btn btn-sm btn-warning d-flex align-items-center gap-1 mx-auto"
-                        >
-                          <Wallet size={16} />
-                          {updatingId === order._id ? "Updating..." : "Mark as Paid"}
-                        </button>
                       ) : (
                         <span className="text-danger d-flex justify-content-center align-items-center gap-1">
                           <XCircle size={16} /> Unpaid
@@ -249,22 +263,16 @@ const DeliveryDashboard = () => {
                           onClick={() => markDelivered(order._id)}
                           disabled={
                             updatingId === order._id ||
-                            (order.paymentMethod === "COD" && !order.isPaid)
+                            !order.isPaid 
                           }
                           className={`btn btn-sm d-flex align-items-center gap-1 mx-auto ${
-                            order.paymentMethod === "COD" && !order.isPaid
+                            !order.isPaid
                               ? "btn-secondary disabled-btn"
                               : "btn-success"
                           }`}
                           style={{
-                            cursor:
-                              order.paymentMethod === "COD" && !order.isPaid
-                                ? "not-allowed"
-                                : "pointer",
-                            opacity:
-                              order.paymentMethod === "COD" && !order.isPaid
-                                ? 0.6
-                                : 1,
+                            cursor: !order.isPaid ? "not-allowed" : "pointer",
+                            opacity: !order.isPaid ? 0.6 : 1,
                           }}
                         >
                           <CheckCircle size={16} />
