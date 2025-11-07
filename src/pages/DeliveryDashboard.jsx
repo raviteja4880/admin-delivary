@@ -20,6 +20,7 @@ import "../DeliveryDashboard.css";
 const DeliveryDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [updatingId, setUpdatingId] = useState(null); // For button loading state
 
   useEffect(() => {
     fetchOrders();
@@ -39,24 +40,39 @@ const DeliveryDashboard = () => {
   };
 
   const markDelivered = async (orderId) => {
+    if (updatingId) return;
+    setUpdatingId(orderId);
     try {
       await deliveryAPI.markDelivered(orderId);
-      await fetchOrders();
+      setOrders((prev) =>
+        prev.map((o) =>
+          o._id === orderId ? { ...o, isDelivered: true } : o
+        )
+      );
     } catch (error) {
       console.error("Error marking order delivered:", error);
       alert("Failed to update delivery status.");
+    } finally {
+      setUpdatingId(null);
     }
   };
 
-  // COD payment confirmation
   const markPaid = async (orderId) => {
     if (!window.confirm("Confirm COD payment received?")) return;
+    if (updatingId) return;
+    setUpdatingId(orderId);
     try {
       await deliveryAPI.markPaid(orderId);
-      await fetchOrders();
+      setOrders((prev) =>
+        prev.map((o) =>
+          o._id === orderId ? { ...o, isPaid: true } : o
+        )
+      );
     } catch (error) {
       console.error("Error marking order as paid:", error);
       alert("Failed to update payment status.");
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -195,7 +211,7 @@ const DeliveryDashboard = () => {
                       </div>
                     </td>
 
-                    {/* Payment Status */}
+                    {/* Payment */}
                     <td className="text-center align-middle">
                       {order.isPaid ? (
                         <span className="text-success d-flex justify-content-center align-items-center gap-1">
@@ -204,9 +220,11 @@ const DeliveryDashboard = () => {
                       ) : order.paymentMethod === "COD" ? (
                         <button
                           onClick={() => markPaid(order._id)}
+                          disabled={updatingId === order._id}
                           className="btn btn-sm btn-warning d-flex align-items-center gap-1 mx-auto"
                         >
-                          <Wallet size={16} /> Mark as Paid
+                          <Wallet size={16} />
+                          {updatingId === order._id ? "Updating..." : "Mark as Paid"}
                         </button>
                       ) : (
                         <span className="text-danger d-flex justify-content-center align-items-center gap-1">
@@ -215,7 +233,7 @@ const DeliveryDashboard = () => {
                       )}
                     </td>
 
-                    {/* Delivery Status */}
+                    {/* Delivered */}
                     <td className="text-center align-middle">
                       {order.isDelivered ? (
                         <CheckCircle size={20} className="text-success" />
@@ -224,16 +242,35 @@ const DeliveryDashboard = () => {
                       )}
                     </td>
 
-                    {/* Actions */}
+                    {/* Action */}
                     <td className="text-center align-middle">
                       {!order.isDelivered && (
                         <button
                           onClick={() => markDelivered(order._id)}
-                          className="btn btn-success btn-sm d-flex align-items-center gap-1 mx-auto"
-                          disabled={order.paymentMethod === "COD" && !order.isPaid} 
+                          disabled={
+                            updatingId === order._id ||
+                            (order.paymentMethod === "COD" && !order.isPaid)
+                          }
+                          className={`btn btn-sm d-flex align-items-center gap-1 mx-auto ${
+                            order.paymentMethod === "COD" && !order.isPaid
+                              ? "btn-secondary disabled-btn"
+                              : "btn-success"
+                          }`}
+                          style={{
+                            cursor:
+                              order.paymentMethod === "COD" && !order.isPaid
+                                ? "not-allowed"
+                                : "pointer",
+                            opacity:
+                              order.paymentMethod === "COD" && !order.isPaid
+                                ? 0.6
+                                : 1,
+                          }}
                         >
                           <CheckCircle size={16} />
-                          Mark Delivered
+                          {updatingId === order._id
+                            ? "Updating..."
+                            : "Mark Delivered"}
                         </button>
                       )}
                     </td>

@@ -23,3 +23,10 @@
 .row.g-3 > [class*="col-"] > .card {
   flex: 1;
 }
+
+.disabled-btn {
+  pointer-events: none;
+  opacity: 0.6;
+  cursor: not-allowed !important;
+}
+
