@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Auth from "./pages/Auth";
-import AdminOrders from "./pages/AdminOrders";
+import AdminOrders from "./pages/Adminorders";
 import DeliveryDashboard from "./pages/DeliveryDashboard";
 import ProfilePage from "./pages/ProfilePage";
 import AdminAnalytics from "./pages/AdminAnalytics";
