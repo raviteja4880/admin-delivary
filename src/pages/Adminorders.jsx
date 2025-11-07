@@ -28,8 +28,6 @@ const loadData = async () => {
       adminAPI.getAllOrders(),
       adminAPI.getDeliveryPartners(),
     ]);
-    console.log("📦 Orders data:", ordersRes.data);
-    console.log("🚚 Delivery partners data:", partnersRes.data);
     setOrders(ordersRes.data);
     setPartners(partnersRes.data);
   } catch (error) {

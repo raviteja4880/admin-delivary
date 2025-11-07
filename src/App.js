@@ -1,28 +1,40 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Auth from "./pages/Auth";
-import AdminOrders from "./pages/Adminorders";
+import AdminOrders from "./pages/AdminOrders";
 import DeliveryDashboard from "./pages/DeliveryDashboard";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import ProfilePage from "./pages/ProfilePage";
 import AdminAnalytics from "./pages/AdminAnalytics";
+import DeliveryAnalytics from "./pages/DeliveryAnalytics";
+import Navbar from "./pages/Navbar";
 
-<ToastContainer position="top-right" autoClose={5000} />
-
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
+  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+  const isLoggedIn = !!userInfo;
+
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Auth />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/delivery/analytics" element={<DeliveryDashboard />} />
-        <Route path="/admin/analytics" element={<AdminAnalytics />} />
-        <Route path="/admin/dashboard" element={<AdminOrders />} />
-        <Route path="/delivery/dashboard" element={<DeliveryDashboard />} />
+      <ToastContainer position="top-right" autoClose={5000} />
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" />} />
+      <Routes>
+        {/* Public */}
+        <Route path="/" element={<Auth />} />
+
+        {/* Protected (show navbar only if logged in) */}
+        {isLoggedIn && (
+          <>
+            <Route path="/profile" element={<><Navbar /><ProfilePage /></>} />
+            <Route path="/admin/analytics" element={<><Navbar /><AdminAnalytics /></>} />
+            <Route path="/admin/dashboard" element={<><Navbar /><AdminOrders /></>} />
+            <Route path="/delivery/analytics" element={<><Navbar /><DeliveryAnalytics /></>} />
+            <Route path="/delivery/dashboard" element={<><Navbar /><DeliveryDashboard /></>} />
+          </>
+        )}
+
+        {/* Redirect any unknown route */}
+        <Route path="*" element={<Navigate to={isLoggedIn ? "/profile" : "/"} />} />
       </Routes>
     </BrowserRouter>
   );
