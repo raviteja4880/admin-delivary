@@ -83,91 +83,113 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="container mt-5" style={{ maxWidth: "600px" }}>
-      <div className="card shadow-sm border-0">
-        <div className="card-body p-4">
-          <h3 className="mb-3 fw-semibold text-center text-primary">
-            Edit Profile
-          </h3>
+    <div
+      className="d-flex justify-content-center align-items-center"
+      style={{
+        minHeight: "calc(100vh - 100px)",
+        background: "#f8f9fa",
+      }}
+    >
+      <div
+        className="card shadow-lg border-0 p-4"
+        style={{
+          width: "100%",
+          maxWidth: "480px",
+          borderRadius: "18px",
+          background: "#ffffff",
+        }}
+      >
+        <h3
+          className="text-center fw-bold mb-4"
+          style={{ color: "#0d6efd", letterSpacing: "0.3px" }}
+        >
+          Edit Profile
+        </h3>
 
-          <form onSubmit={handleSubmit}>
-            {/* Name */}
-            <div className="mb-3">
-              <label className="form-label fw-medium">Full Name</label>
-              <input
-                type="text"
-                className="form-control"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                placeholder="Enter your full name"
-                required
-              />
-            </div>
+        <form onSubmit={handleSubmit}>
+          {/* Name */}
+          <div className="mb-3">
+            <label className="form-label fw-semibold text-secondary small">
+              Full Name
+            </label>
+            <input
+              type="text"
+              className="form-control py-2"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+              placeholder="Enter your full name"
+              required
+            />
+          </div>
 
-            {/* Email (read-only) */}
-            <div className="mb-3">
-              <label className="form-label fw-medium">Email</label>
-              <input
-                type="email"
-                className="form-control"
-                value={formData.email}
-                disabled
-                readOnly
-              />
-            </div>
+          {/* Email */}
+          <div className="mb-3">
+            <label className="form-label fw-semibold text-secondary small">
+              Email
+            </label>
+            <input
+              type="email"
+              className="form-control py-2 bg-light text-muted"
+              value={formData.email}
+              disabled
+              readOnly
+            />
+          </div>
 
-            {/* Phone */}
-            <div className="mb-3">
-              <label className="form-label fw-medium">Phone Number</label>
-              <input
-                type="tel"
-                className="form-control"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
-                placeholder="Enter your 10-digit mobile number"
-                required
-                pattern="[6-9][0-9]{9}"
-                title="Enter a valid 10-digit number starting with 6–9"
-              />
-            </div>
+          {/* Phone */}
+          <div className="mb-3">
+            <label className="form-label fw-semibold text-secondary small">
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              className="form-control py-2"
+              value={formData.phone}
+              onChange={(e) =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
+              placeholder="Enter your 10-digit mobile number"
+              required
+              pattern="[6-9][0-9]{9}"
+              title="Enter a valid 10-digit number starting with 6–9"
+            />
+          </div>
 
-            {/* Password */}
-            <div className="mb-4">
-              <label className="form-label fw-medium">
-                New Password (optional)
-              </label>
-              <input
-                type="password"
-                className="form-control"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-                placeholder="Enter new password (leave blank to keep current)"
-              />
-            </div>
+          {/* Password */}
+          <div className="mb-4">
+            <label className="form-label fw-semibold text-secondary small">
+              New Password <span className="text-muted">(optional)</span>
+            </label>
+            <input
+              type="password"
+              className="form-control py-2"
+              value={formData.password}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+              placeholder="Enter new password (leave blank to keep current)"
+            />
+          </div>
 
-            {/* Save Button */}
-            <button
-              type="submit"
-              className="btn btn-primary w-100 py-2"
-              disabled={saving}
-            >
-              {saving ? (
-                <>
-                  <Loader2 className="me-2 animate-spin" size={18} />
-                  Saving...
-                </>
-              ) : (
-                "Save Changes"
-              )}
-            </button>
-          </form>
-        </div>
+          {/* Save Button */}
+          <button
+            type="submit"
+            className="btn btn-primary w-100 fw-semibold py-2"
+            style={{ borderRadius: "10px" }}
+            disabled={saving}
+          >
+            {saving ? (
+              <>
+                <Loader2 className="me-2 animate-spin" size={18} />
+                Saving...
+              </>
+            ) : (
+              "Save Changes"
+            )}
+          </button>
+        </form>
       </div>
     </div>
   );

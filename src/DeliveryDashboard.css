@@ -29,3 +29,28 @@
   opacity: 0.6;
   cursor: not-allowed !important;
 }
+
+/* Default desktop style */
+.address-text {
+  max-width: 320px;
+  word-break: break-word;
+  white-space: normal;
+  display: block;
+}
+
+/* Mobile-friendly style */
+@media (max-width: 768px) {
+  .address-text {
+    max-width: 100% !important;
+    word-break: break-word;
+    white-space: normal;
+  }
+
+@media (max-width: 576px) {
+  td.align-middle {
+    display: block;
+    width: 100%;
+    word-wrap: break-word;
+  }
+}
+}

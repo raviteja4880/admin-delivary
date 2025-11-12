@@ -7,7 +7,7 @@ import ProfilePage from "./pages/ProfilePage";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import DeliveryAnalytics from "./pages/DeliveryAnalytics";
 import Navbar from "./components/Navbar";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function App() {
@@ -15,24 +15,16 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    toast.info("Checking login status…", { autoClose: 2000 });
-
     const storedUser = localStorage.getItem("userInfo");
     if (storedUser) setUserInfo(JSON.parse(storedUser));
 
-    const timer = setTimeout(() => setLoading(false), 1000); 
+    const timer = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(timer);
   }, []);
 
   const isLoggedIn = !!userInfo;
 
-  if (loading) {
-    return (
-      <>
-        <ToastContainer position="top-right" autoClose={2000} />
-      </>
-    );
-  }
+  if (loading) return null;
 
   return (
     <BrowserRouter>
@@ -45,9 +37,9 @@ function App() {
         {isLoggedIn && (
           <>
             <Route path="/profile" element={<><Navbar /><ProfilePage /></>} />
-            <Route path="/admin/analytics" element={<AdminAnalytics />} />
+            <Route path="/admin/analytics" element={<><AdminAnalytics /></>} />
             <Route path="/admin/dashboard" element={<><Navbar /><AdminOrders /></>} />
-            <Route path="/delivery/analytics" element={<DeliveryAnalytics />} />
+            <Route path="/delivery/analytics" element={<><DeliveryAnalytics /></>} />
             <Route path="/delivery/dashboard" element={<><Navbar /><DeliveryDashboard /></>} />
           </>
         )}

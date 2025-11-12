@@ -14,6 +14,8 @@ import {
   ExternalLink,
   CreditCard,
   Wallet,
+  Filter,
+  ArrowUpDown,
 } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -21,8 +23,14 @@ import "../DeliveryDashboard.css";
 
 const DeliveryDashboard = () => {
   const [orders, setOrders] = useState([]);
+  const [filteredOrders, setFilteredOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
+
+  // Filters
+  const [paymentFilter, setPaymentFilter] = useState("all");
+  const [deliveryFilter, setDeliveryFilter] = useState("all");
+  const [sortOption, setSortOption] = useState("newest");
 
   useEffect(() => {
     fetchOrders();
@@ -33,6 +41,7 @@ const DeliveryDashboard = () => {
     try {
       const { data } = await deliveryAPI.getMyOrders();
       setOrders(data);
+      setFilteredOrders(data);
     } catch (error) {
       console.error("Error fetching delivery orders:", error);
       toast.error("Failed to fetch orders. Check backend connection.");
@@ -40,6 +49,40 @@ const DeliveryDashboard = () => {
       setLoading(false);
     }
   };
+
+  // ===== Filtering and Sorting Logic =====
+  useEffect(() => {
+    let filtered = [...orders];
+
+    if (paymentFilter !== "all") {
+      filtered = filtered.filter((o) =>
+        paymentFilter === "paid" ? o.isPaid : !o.isPaid
+      );
+    }
+
+    if (deliveryFilter !== "all") {
+      filtered = filtered.filter((o) =>
+        deliveryFilter === "delivered" ? o.isDelivered : !o.isDelivered
+      );
+    }
+
+    // Sorting
+    if (sortOption === "amountHigh") {
+      filtered.sort((a, b) => b.totalPrice - a.totalPrice);
+    } else if (sortOption === "amountLow") {
+      filtered.sort((a, b) => a.totalPrice - b.totalPrice);
+    } else if (sortOption === "newest") {
+      filtered.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+    } else if (sortOption === "oldest") {
+      filtered.sort(
+        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+      );
+    }
+
+    setFilteredOrders(filtered);
+  }, [paymentFilter, deliveryFilter, sortOption, orders]);
 
   const markDelivered = async (orderId) => {
     if (updatingId) return;
@@ -51,7 +94,7 @@ const DeliveryDashboard = () => {
           o._id === orderId ? { ...o, isDelivered: true } : o
         )
       );
-      toast.success(" Order marked as delivered");
+      toast.success("Order marked as delivered");
     } catch (error) {
       console.error("Error marking delivered:", error);
       toast.error("Failed to update delivery status.");
@@ -67,11 +110,9 @@ const DeliveryDashboard = () => {
     try {
       await deliveryAPI.markPaid(orderId);
       setOrders((prev) =>
-        prev.map((o) =>
-          o._id === orderId ? { ...o, isPaid: true } : o
-        )
+        prev.map((o) => (o._id === orderId ? { ...o, isPaid: true } : o))
       );
-      toast.success(" COD payment confirmed");
+      toast.success("COD payment confirmed");
     } catch (error) {
       console.error("Error marking as paid:", error);
       toast.error("Failed to mark as paid.");
@@ -150,6 +191,52 @@ const DeliveryDashboard = () => {
         </div>
       </div>
 
+      {/* FILTER BAR */}
+      <div className="d-flex flex-wrap justify-content-between align-items-center mb-3 p-3 bg-light rounded-3 shadow-sm">
+        <div className="d-flex flex-wrap align-items-center gap-3">
+          <div className="d-flex align-items-center gap-2">
+            <Filter size={18} className="text-secondary" />
+            <span className="fw-semibold">Filters:</span>
+          </div>
+          <select
+            className="form-select form-select-sm"
+            style={{ width: 160 }}
+            value={paymentFilter}
+            onChange={(e) => setPaymentFilter(e.target.value)}
+          >
+            <option value="all">All Payments</option>
+            <option value="paid">Paid</option>
+            <option value="unpaid">Unpaid</option>
+          </select>
+
+          <select
+            className="form-select form-select-sm"
+            style={{ width: 180 }}
+            value={deliveryFilter}
+            onChange={(e) => setDeliveryFilter(e.target.value)}
+          >
+            <option value="all">All Deliveries</option>
+            <option value="delivered">Delivered</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
+
+        <div className="d-flex align-items-center gap-2 mt-2 mt-md-0">
+          <ArrowUpDown size={18} className="text-secondary" />
+          <select
+            className="form-select form-select-sm"
+            style={{ width: 180 }}
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value)}
+          >
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="amountHigh">Amount: High → Low</option>
+            <option value="amountLow">Amount: Low → High</option>
+          </select>
+        </div>
+      </div>
+
       {/* ORDERS TABLE */}
       <div className="card shadow-sm border-0">
         <div className="table-responsive">
@@ -165,8 +252,8 @@ const DeliveryDashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {orders.length > 0 ? (
-                orders.map((order) => (
+              {filteredOrders.length > 0 ? (
+                filteredOrders.map((order) => (
                   <tr key={order._id}>
                     {/* Customer Info */}
                     <td className="align-middle">
@@ -187,9 +274,9 @@ const DeliveryDashboard = () => {
                       <div className="d-flex align-items-start gap-2">
                         <MapPin size={16} className="text-muted mt-1" />
                         <div>
-                          <span style={{ maxWidth: "260px", wordBreak: "break-word" }}>
-                            {order.shippingAddress || "No address provided"}
-                          </span>
+                        <span className="address-text">
+                          {order.shippingAddress || "No address provided"}
+                        </span>
                           {order.shippingAddress && (
                             <div>
                               <a
@@ -231,9 +318,7 @@ const DeliveryDashboard = () => {
                             className="btn btn-sm btn-warning d-flex align-items-center gap-1 mx-auto"
                           >
                             <Wallet size={16} />
-                            {updatingId === order._id
-                              ? "Updating..."
-                              : "Mark as Paid"}
+                            {updatingId === order._id ? "Updating..." : "Mark as Paid"}
                           </button>
                         )
                       ) : order.isPaid ? (
@@ -261,14 +346,9 @@ const DeliveryDashboard = () => {
                       {!order.isDelivered && (
                         <button
                           onClick={() => markDelivered(order._id)}
-                          disabled={
-                            updatingId === order._id ||
-                            !order.isPaid 
-                          }
+                          disabled={updatingId === order._id || !order.isPaid}
                           className={`btn btn-sm d-flex align-items-center gap-1 mx-auto ${
-                            !order.isPaid
-                              ? "btn-secondary disabled-btn"
-                              : "btn-success"
+                            !order.isPaid ? "btn-secondary disabled-btn" : "btn-success"
                           }`}
                           style={{
                             cursor: !order.isPaid ? "not-allowed" : "pointer",
@@ -276,9 +356,7 @@ const DeliveryDashboard = () => {
                           }}
                         >
                           <CheckCircle size={16} />
-                          {updatingId === order._id
-                            ? "Updating..."
-                            : "Mark Delivered"}
+                          {updatingId === order._id ? "Updating..." : "Mark Delivered"}
                         </button>
                       )}
                     </td>
@@ -287,7 +365,7 @@ const DeliveryDashboard = () => {
               ) : (
                 <tr>
                   <td colSpan="6" className="text-center text-muted py-4">
-                    No assigned deliveries yet.
+                    No orders found with current filters.
                   </td>
                 </tr>
               )}

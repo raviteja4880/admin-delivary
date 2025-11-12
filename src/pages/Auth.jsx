@@ -34,10 +34,8 @@ const AuthLanding = () => {
       const userRole = data.user?.role || data.role;
 
       if (userRole === "admin") {
-        toast.success("Welcome back, Admin!");
         navigate("/admin/dashboard");
       } else if (userRole === "delivery") {
-        toast.success("Welcome back, Delivery Partner!");
         navigate("/delivery/dashboard");
       } else {
         toast.error("Access denied — not an admin or delivery partner.");
@@ -55,13 +53,12 @@ const AuthLanding = () => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords do not match");
+      toast.error("Passwords do not match.");
       return;
     }
 
-    // Validate phone number
     if (!/^[6-9]\d{9}$/.test(formData.phone)) {
-      alert("Please enter a valid 10-digit mobile number starting with 6–9");
+      toast.error("Please enter a valid 10-digit mobile number.");
       return;
     }
 
@@ -72,17 +69,14 @@ const AuthLanding = () => {
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
-        role: "delivery", 
+        role: "delivery",
       });
 
-      alert("Registration successful! You can now login as a Delivery Partner.");
+      toast.success("Registration successful! You can now log in.");
       setActiveTab("login");
     } catch (err) {
       console.error("Register error:", err);
-      alert(
-        err.response?.data?.message ||
-          "Registration failed. Please try again later."
-      );
+      toast.error(err.response?.data?.message || "Registration failed.");
     } finally {
       setLoading(false);
     }
@@ -103,7 +97,6 @@ const AuthLanding = () => {
         overflow: "hidden",
       }}
     >
-      {/* Heading */}
       <motion.div
         initial={{ opacity: 0, y: -40 }}
         animate={{ opacity: 1, y: 0 }}
@@ -112,11 +105,10 @@ const AuthLanding = () => {
       >
         <h1 className="fw-bold display-5">TejaCommerce Control Center</h1>
         <p className="text-light fs-5">
-          Manage orders, delivery & operations from one secure portal ⚙️
+          Manage orders, delivery & operations from one secure portal
         </p>
       </motion.div>
 
-      {/* Auth Card */}
       <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}
@@ -134,7 +126,6 @@ const AuthLanding = () => {
             backdropFilter: "blur(12px)",
           }}
         >
-          {/* Animated Forms */}
           <AnimatePresence mode="wait">
             {activeTab === "login" ? (
               <motion.form
@@ -178,7 +169,7 @@ const AuthLanding = () => {
 
                 <button
                   type="submit"
-                  className="btn btn-primary w-100"
+                  className="btn btn-primary w-100 fw-semibold"
                   disabled={loading}
                 >
                   {loading ? "Logging in..." : "Login"}
@@ -236,7 +227,6 @@ const AuthLanding = () => {
                     placeholder="Enter your 10-digit mobile number"
                     required
                     pattern="[6-9][0-9]{9}"
-                    title="Enter a valid 10-digit number starting with 6–9"
                   />
                 </div>
 
@@ -273,7 +263,7 @@ const AuthLanding = () => {
 
                 <button
                   type="submit"
-                  className="btn btn-success w-100"
+                  className="btn btn-success w-100 fw-semibold"
                   disabled={loading}
                 >
                   {loading ? "Registering..." : "Register as Delivery Partner"}
@@ -282,7 +272,6 @@ const AuthLanding = () => {
             )}
           </AnimatePresence>
 
-          {/* Footer Links */}
           <p className="text-center mt-3 mb-0">
             {activeTab === "login" ? (
               <>
