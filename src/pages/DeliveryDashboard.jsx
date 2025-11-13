@@ -357,23 +357,14 @@ const DeliveryDashboard = () => {
 
                     {/* FIXED DELIVERED DATE COLUMN */}
                     <td className="text-center align-middle">
-                      {order.isDelivered && order.deliveredAt ? (
+                      {order.expectedDeliveryDate ? (
                         <>
-                          {new Date(order.deliveredAt).toLocaleDateString("en-IN", {
+                          {new Date(order.expectedDeliveryDate).toLocaleDateString("en-IN", {
                             day: "2-digit",
                             month: "short",
                             year: "numeric",
                           })}
-                          <br />
-                          <small className="text-muted">
-                            {new Date(order.deliveredAt).toLocaleTimeString("en-IN", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </small>
                         </>
-                      ) : order.isDelivered ? (
-                        <span className="text-warning small">No Timestamp</span>
                       ) : (
                         <span className="text-muted small">--</span>
                       )}
