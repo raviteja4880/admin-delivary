@@ -44,7 +44,7 @@ const DeliveryDashboard = () => {
       setFilteredOrders(data);
     } catch (error) {
       console.error("Error fetching delivery orders:", error);
-      toast.error("Failed to fetch orders. Check backend connection.");
+      toast.error("Failed to fetch orders.");
     } finally {
       setLoading(false);
     }
@@ -66,7 +66,6 @@ const DeliveryDashboard = () => {
       );
     }
 
-    // Sorting
     if (sortOption === "amountHigh") {
       filtered.sort((a, b) => b.totalPrice - a.totalPrice);
     } else if (sortOption === "amountLow") {
@@ -86,14 +85,19 @@ const DeliveryDashboard = () => {
 
   const markDelivered = async (orderId) => {
     if (updatingId) return;
+
     setUpdatingId(orderId);
     try {
-      await deliveryAPI.markDelivered(orderId);
+      const { data } = await deliveryAPI.markDelivered(orderId);
+
       setOrders((prev) =>
         prev.map((o) =>
-          o._id === orderId ? { ...o, isDelivered: true } : o
+          o._id === orderId
+            ? { ...o, isDelivered: true, deliveredAt: data.deliveredAt }
+            : o
         )
       );
+
       toast.success("Order marked as delivered");
     } catch (error) {
       console.error("Error marking delivered:", error);
@@ -106,6 +110,7 @@ const DeliveryDashboard = () => {
   const markPaid = async (orderId) => {
     if (!window.confirm("Confirm COD payment received?")) return;
     if (updatingId) return;
+
     setUpdatingId(orderId);
     try {
       await deliveryAPI.markPaid(orderId);
@@ -198,6 +203,7 @@ const DeliveryDashboard = () => {
             <Filter size={18} className="text-secondary" />
             <span className="fw-semibold">Filters:</span>
           </div>
+
           <select
             className="form-select form-select-sm"
             style={{ width: 160 }}
@@ -248,9 +254,14 @@ const DeliveryDashboard = () => {
                 <th>Total</th>
                 <th className="text-center">Payment</th>
                 <th className="text-center">Delivered</th>
+
+                {/* FIXED DELIVERED DATE COLUMN */}
+                <th className="text-center">Delivered Date</th>
+
                 <th className="text-center">Action</th>
               </tr>
             </thead>
+
             <tbody>
               {filteredOrders.length > 0 ? (
                 filteredOrders.map((order) => (
@@ -274,9 +285,10 @@ const DeliveryDashboard = () => {
                       <div className="d-flex align-items-start gap-2">
                         <MapPin size={16} className="text-muted mt-1" />
                         <div>
-                        <span className="address-text">
-                          {order.shippingAddress || "No address provided"}
-                        </span>
+                          <span className="address-text">
+                            {order.shippingAddress || "No address provided"}
+                          </span>
+
                           {order.shippingAddress && (
                             <div>
                               <a
@@ -318,13 +330,15 @@ const DeliveryDashboard = () => {
                             className="btn btn-sm btn-warning d-flex align-items-center gap-1 mx-auto"
                           >
                             <Wallet size={16} />
-                            {updatingId === order._id ? "Updating..." : "Mark as Paid"}
+                            {updatingId === order._id
+                              ? "Updating..."
+                              : "Mark as Paid"}
                           </button>
                         )
                       ) : order.isPaid ? (
                         <span className="text-success d-flex justify-content-center align-items-center gap-1">
                           <CreditCard size={16} /> Paid
-                        </span>
+                          </span>
                       ) : (
                         <span className="text-danger d-flex justify-content-center align-items-center gap-1">
                           <XCircle size={16} /> Unpaid
@@ -341,14 +355,65 @@ const DeliveryDashboard = () => {
                       )}
                     </td>
 
-                    {/* Action */}
+                    {/* FIXED DELIVERED DATE COLUMN */}
                     <td className="text-center align-middle">
-                      {!order.isDelivered && (
+                      {order.isDelivered && order.deliveredAt ? (
+                        <>
+                          {new Date(order.deliveredAt).toLocaleDateString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                          <br />
+                          <small className="text-muted">
+                            {new Date(order.deliveredAt).toLocaleTimeString("en-IN", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </small>
+                        </>
+                      ) : order.isDelivered ? (
+                        <span className="text-warning small">No Timestamp</span>
+                      ) : (
+                        <span className="text-muted small">--</span>
+                      )}
+                    </td>
+
+                    {/* ACTION COLUMN */}
+                    <td className="text-center align-middle">
+                      {order.isDelivered ? (
+                        order.deliveredAt ? (
+                          <div className="text-success fw-semibold">
+                            Delivered
+                            <br />
+                            <small className="text-muted">
+                              {new Date(order.deliveredAt).toLocaleString(
+                                "en-IN",
+                                {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )}
+                            </small>
+                          </div>
+                        ) : (
+                          <div className="text-warning fw-semibold">
+                            Delivered
+                            <br />
+                            <small className="text-muted">No Timestamp</small>
+                          </div>
+                        )
+                      ) : (
                         <button
                           onClick={() => markDelivered(order._id)}
                           disabled={updatingId === order._id || !order.isPaid}
                           className={`btn btn-sm d-flex align-items-center gap-1 mx-auto ${
-                            !order.isPaid ? "btn-secondary disabled-btn" : "btn-success"
+                            !order.isPaid
+                              ? "btn-secondary disabled-btn"
+                              : "btn-success"
                           }`}
                           style={{
                             cursor: !order.isPaid ? "not-allowed" : "pointer",
@@ -356,7 +421,9 @@ const DeliveryDashboard = () => {
                           }}
                         >
                           <CheckCircle size={16} />
-                          {updatingId === order._id ? "Updating..." : "Mark Delivered"}
+                          {updatingId === order._id
+                            ? "Updating..."
+                            : "Mark Delivered"}
                         </button>
                       )}
                     </td>
@@ -364,12 +431,13 @@ const DeliveryDashboard = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="text-center text-muted py-4">
+                  <td colSpan="7" className="text-center text-muted py-4">
                     No orders found with current filters.
                   </td>
                 </tr>
               )}
             </tbody>
+
           </table>
         </div>
       </div>
