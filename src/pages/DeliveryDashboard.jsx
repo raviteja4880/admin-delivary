@@ -253,11 +253,9 @@ const DeliveryDashboard = () => {
                 <th>Address</th>
                 <th>Total</th>
                 <th className="text-center">Payment</th>
-                <th className="text-center">Delivered</th>
+                <th className="text-center">Delivery Date</th>
 
                 {/* FIXED DELIVERED DATE COLUMN */}
-                <th className="text-center">Delivered Date</th>
-
                 <th className="text-center">Action</th>
               </tr>
             </thead>
@@ -345,26 +343,15 @@ const DeliveryDashboard = () => {
                         </span>
                       )}
                     </td>
-
-                    {/* Delivered */}
-                    <td className="text-center align-middle">
-                      {order.isDelivered ? (
-                        <CheckCircle size={20} className="text-success" />
-                      ) : (
-                        <XCircle size={20} className="text-danger" />
-                      )}
-                    </td>
-
-                    {/* FIXED DELIVERED DATE COLUMN */}
                     <td className="text-center align-middle">
                       {order.expectedDeliveryDate ? (
-                        <>
+                        <span>
                           {new Date(order.expectedDeliveryDate).toLocaleDateString("en-IN", {
                             day: "2-digit",
                             month: "short",
                             year: "numeric",
                           })}
-                        </>
+                        </span>
                       ) : (
                         <span className="text-muted small">--</span>
                       )}
@@ -392,7 +379,7 @@ const DeliveryDashboard = () => {
                           </div>
                         ) : (
                           <div className="text-warning fw-semibold">
-                            Delivered
+                            Delivered on
                             <br />
                             <small className="text-muted">No Timestamp</small>
                           </div>
