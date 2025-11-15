@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { authAPI } from "../services/api";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { ShieldCheck, Truck, Users, Lock } from "lucide-react";
+import "../AuthLanding.css";
 
 const AuthLanding = () => {
   const [activeTab, setActiveTab] = useState("login");
@@ -22,38 +24,35 @@ const AuthLanding = () => {
     e.preventDefault();
     setLoading(true);
 
-try {
-  const { data } = await authAPI.login({
-    email: formData.email,
-    password: formData.password,
-  });
+    try {
+      const { data } = await authAPI.login({
+        email: formData.email,
+        password: formData.password,
+      });
 
-  // Save user data and token
-  localStorage.setItem("userInfo", JSON.stringify(data.user || data));
-  localStorage.setItem("token", data.token);
+      localStorage.setItem("userInfo", JSON.stringify(data.user || data));
+      localStorage.setItem("token", data.token);
 
-  // Extract role safely
-  const userRole = data.user?.role || data.role;
+      const userRole = data.user?.role || data.role;
 
-  // Role-based redirects
-  if (userRole === "superadmin") {
-    navigate("/superadmin/analytics");
-    toast.success("Welcome Super Admin");
-  } else if (userRole === "admin") {
-    navigate("/admin/dashboard");
-    toast.success("Welcome Admin");
-  } else if (userRole === "delivery") {
-    navigate("/delivery/dashboard");
-    toast.success("Welcome Delivery Partner");
-  } else {
-    toast.error("Access denied — only Admin, Super Admin, or Delivery can log in.");
-  }
-} catch (err) {
-  console.error("Login error:", err);
-  toast.error(err.response?.data?.message || "Invalid credentials.");
-} finally {
-  setLoading(false);
-}
+      if (userRole === "superadmin") {
+        navigate("/superadmin/analytics");
+        toast.success("Welcome Super Admin");
+      } else if (userRole === "admin") {
+        navigate("/admin/dashboard");
+        toast.success("Welcome Admin");
+      } else if (userRole === "delivery") {
+        navigate("/delivery/dashboard");
+        toast.success("Welcome Delivery Partner");
+      } else {
+        toast.error("Access denied — only Admin, Super Admin, or Delivery can log in.");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      toast.error(err.response?.data?.message || "Invalid credentials.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ================= REGISTER =================
@@ -96,27 +95,23 @@ try {
     exit: { opacity: 0, y: -40 },
   };
 
-  // ================= UI =================
   return (
-    <div
-      className="d-flex flex-column justify-content-center align-items-center vh-100 text-white"
-      style={{
-        background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)",
-        overflow: "hidden",
-      }}
-    >
-      <motion.div
-        initial={{ opacity: 0, y: -40 }}
+    <div className="auth-landing">
+      {/* ===== HERO SECTION ===== */}
+      <motion.section
+        className="hero-section text-center text-light"
+        initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
-        className="text-center mb-4"
       >
-        <h1 className="fw-bold display-5">TejaCommerce Control Center</h1>
-        <p className="text-light fs-5">
-          Manage orders, delivery & operations from one secure portal
+        <Lock size={48} className="mb-3 text-light opacity-90" />
+        <h1 className="display-6 fw-bold mb-2">TejaCommerce Control Center</h1>
+        <p className="fs-5 text-light opacity-75 mb-4">
+          Manage operations, orders, and delivery seamlessly in one platform.
         </p>
-      </motion.div>
+      </motion.section>
 
+      {/* ===== FORM CARD ===== */}
       <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}
@@ -124,15 +119,7 @@ try {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -50, scale: 0.95 }}
           transition={{ duration: 0.5 }}
-          className="card shadow-lg p-4 border-0"
-          style={{
-            width: "100%",
-            maxWidth: "430px",
-            borderRadius: "1rem",
-            background: "rgba(255,255,255,0.9)",
-            color: "#333",
-            backdropFilter: "blur(12px)",
-          }}
+          className="auth-card card shadow-lg p-4 border-0 mx-auto"
         >
           <AnimatePresence mode="wait">
             {activeTab === "login" ? (
@@ -145,10 +132,10 @@ try {
                 transition={{ duration: 0.3 }}
                 onSubmit={handleLogin}
               >
-                <h4 className="text-center mb-4">Welcome Back</h4>
+                <h4 className="text-center fw-semibold mb-4">Welcome Back</h4>
 
                 <div className="mb-3">
-                  <label>Email</label>
+                  <label className="form-label fw-semibold">Email</label>
                   <input
                     type="email"
                     className="form-control"
@@ -162,7 +149,7 @@ try {
                 </div>
 
                 <div className="mb-4">
-                  <label>Password</label>
+                  <label className="form-label fw-semibold">Password</label>
                   <input
                     type="password"
                     className="form-control"
@@ -177,7 +164,7 @@ try {
 
                 <button
                   type="submit"
-                  className="btn btn-primary w-100 fw-semibold"
+                  className="btn btn-primary w-100 fw-semibold py-2"
                   disabled={loading}
                 >
                   {loading ? "Logging in..." : "Login"}
@@ -193,10 +180,12 @@ try {
                 transition={{ duration: 0.3 }}
                 onSubmit={handleRegister}
               >
-                <h4 className="text-center mb-4">Delivery Partner Registration</h4>
+                <h4 className="text-center fw-semibold mb-4">
+                  Delivery Partner Registration
+                </h4>
 
                 <div className="mb-3">
-                  <label>Full Name</label>
+                  <label className="form-label fw-semibold">Full Name</label>
                   <input
                     type="text"
                     className="form-control"
@@ -210,7 +199,7 @@ try {
                 </div>
 
                 <div className="mb-3">
-                  <label>Email</label>
+                  <label className="form-label fw-semibold">Email</label>
                   <input
                     type="email"
                     className="form-control"
@@ -224,7 +213,7 @@ try {
                 </div>
 
                 <div className="mb-3">
-                  <label>Phone Number</label>
+                  <label className="form-label fw-semibold">Phone Number</label>
                   <input
                     type="tel"
                     className="form-control"
@@ -239,7 +228,7 @@ try {
                 </div>
 
                 <div className="mb-3">
-                  <label>Password</label>
+                  <label className="form-label fw-semibold">Password</label>
                   <input
                     type="password"
                     className="form-control"
@@ -253,7 +242,7 @@ try {
                 </div>
 
                 <div className="mb-4">
-                  <label>Confirm Password</label>
+                  <label className="form-label fw-semibold">Confirm Password</label>
                   <input
                     type="password"
                     className="form-control"
@@ -271,7 +260,7 @@ try {
 
                 <button
                   type="submit"
-                  className="btn btn-success w-100 fw-semibold"
+                  className="btn btn-success w-100 fw-semibold py-2"
                   disabled={loading}
                 >
                   {loading ? "Registering..." : "Register as Delivery Partner"}
@@ -308,15 +297,43 @@ try {
         </motion.div>
       </AnimatePresence>
 
-      <motion.footer
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1 }}
-        className="mt-4 text-light-50 text-center"
-        style={{ fontSize: "0.9rem" }}
-      >
-        © {new Date().getFullYear()} TejaCommerce Control Center
-      </motion.footer>
+      {/* ===== INFO SECTION ===== */}
+      <section className="info-section text-center mt-5 px-3">
+        <h3 className="fw-bold mb-4">Why Choose TejaCommerce</h3>
+        <div className="row justify-content-center">
+          <div className="col-md-3 col-10 mb-4">
+            <div className="info-card p-4 shadow-sm rounded-4">
+              <Truck size={36} className="text-primary mb-3" />
+              <h5 className="fw-semibold">Efficient Deliveries</h5>
+              <p className="text-muted small">
+                Manage and track deliveries in real time for faster fulfillment.
+              </p>
+            </div>
+          </div>
+          <div className="col-md-3 col-10 mb-4">
+            <div className="info-card p-4 shadow-sm rounded-4">
+              <ShieldCheck size={36} className="text-success mb-3" />
+              <h5 className="fw-semibold">Secure Access</h5>
+              <p className="text-muted small">
+                Protected authentication for admins and partners.
+              </p>
+            </div>
+          </div>
+          <div className="col-md-3 col-10 mb-4">
+            <div className="info-card p-4 shadow-sm rounded-4">
+              <Users size={36} className="text-warning mb-3" />
+              <h5 className="fw-semibold">Role Management</h5>
+              <p className="text-muted small">
+                Manage Admins, Super Admins, and Delivery Partners efficiently.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer className="text-center mt-5 mb-3 text-light opacity-75">
+        © {new Date().getFullYear()} TejaCommerce Control Center. All rights reserved.
+      </footer>
     </div>
   );
 };
