@@ -22,30 +22,38 @@ const AuthLanding = () => {
     e.preventDefault();
     setLoading(true);
 
-    try {
-      const { data } = await authAPI.login({
-        email: formData.email,
-        password: formData.password,
-      });
+try {
+  const { data } = await authAPI.login({
+    email: formData.email,
+    password: formData.password,
+  });
 
-      localStorage.setItem("userInfo", JSON.stringify(data.user || data));
-      localStorage.setItem("token", data.token);
+  // Save user data and token
+  localStorage.setItem("userInfo", JSON.stringify(data.user || data));
+  localStorage.setItem("token", data.token);
 
-      const userRole = data.user?.role || data.role;
+  // Extract role safely
+  const userRole = data.user?.role || data.role;
 
-      if (userRole === "admin") {
-        navigate("/admin/dashboard");
-      } else if (userRole === "delivery") {
-        navigate("/delivery/dashboard");
-      } else {
-        toast.error("Access denied — not an admin or delivery partner.");
-      }
-    } catch (err) {
-      console.error("Login error:", err);
-      toast.error(err.response?.data?.message || "Invalid credentials.");
-    } finally {
-      setLoading(false);
-    }
+  // Role-based redirects
+  if (userRole === "superadmin") {
+    navigate("/superadmin/analytics");
+    toast.success("Welcome Super Admin");
+  } else if (userRole === "admin") {
+    navigate("/admin/dashboard");
+    toast.success("Welcome Admin");
+  } else if (userRole === "delivery") {
+    navigate("/delivery/dashboard");
+    toast.success("Welcome Delivery Partner");
+  } else {
+    toast.error("Access denied — only Admin, Super Admin, or Delivery can log in.");
+  }
+} catch (err) {
+  console.error("Login error:", err);
+  toast.error(err.response?.data?.message || "Invalid credentials.");
+} finally {
+  setLoading(false);
+}
   };
 
   // ================= REGISTER =================

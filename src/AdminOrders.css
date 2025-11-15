@@ -1,0 +1,15 @@
+/* Make full row red — fixes missing part */
+.cancelled-row,
+.cancelled-row td {
+  background-color: #f8d7da !important;
+}
+
+.cancelled-row:hover,
+.cancelled-row:hover td {
+  background-color: #f5c2c7 !important;
+}
+
+/* Remove hover gap from table row borders */
+table.table-hover tbody tr.cancelled-row:hover > * {
+  background-color: #f5c2c7 !important;
+}

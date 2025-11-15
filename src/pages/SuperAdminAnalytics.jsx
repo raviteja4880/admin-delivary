@@ -13,11 +13,12 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { adminAPI } from "../services/api";
+import { superAdminAPI } from "../services/api";
 import {
   IndianRupee,
   ShoppingBag,
   TrendingUp,
+  Loader2,
   PieChart as PieIcon,
   LineChart as LineIcon,
   BarChart3,
@@ -26,7 +27,7 @@ import DashboardNavbar from "../components/Navbar";
 
 const COLORS = ["#007bff", "#28a745", "#ffc107", "#17a2b8", "#dc3545"];
 
-const AdminAnalytics = () => {
+const SuperAdminAnalytics = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,8 +37,8 @@ const AdminAnalytics = () => {
 
   const loadOrders = async () => {
     try {
-      const { data } = await adminAPI.getAllOrders();
-      setOrders(data);
+      const { data } = await superAdminAPI.getAnalytics();
+      setOrders(data.recentOrders || []);
     } catch (error) {
       console.error("Analytics Load Error:", error);
     } finally {
@@ -45,10 +46,11 @@ const AdminAnalytics = () => {
     }
   };
 
-  if (loading)
+ if (loading)
     return (
       <div className="d-flex justify-content-center align-items-center vh-100 text-secondary">
-        Loading analytics...
+        <Loader2 className="me-2 spinner-border text-primary" />
+        Loading Analytics...
       </div>
     );
 
@@ -240,4 +242,4 @@ const AdminAnalytics = () => {
   );
 };
 
-export default AdminAnalytics;
+export default SuperAdminAnalytics;

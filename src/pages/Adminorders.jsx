@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { adminAPI } from "../services/api";
+import "../AdminOrders.css";
 import {
   CheckCircle,
-  XCircle,
   RefreshCw,
   User,
   IndianRupee,
@@ -70,7 +70,10 @@ const AdminOrders = () => {
         filtered = filtered.filter((o) => o.isDelivered);
         break;
       case "pending":
-        filtered = filtered.filter((o) => !o.isDelivered);
+        filtered = filtered.filter((o) => !o.isDelivered && !o.isCanceled);
+        break;
+      case "cancelled":
+        filtered = filtered.filter((o) => o.isCanceled);
         break;
       case "assigned":
         filtered = filtered.filter((o) => !!o.assignedTo);
@@ -82,7 +85,7 @@ const AdminOrders = () => {
     switch (sortBy) {
       case "oldest":
         filtered.sort(
-          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
         break;
       case "priceHigh":
@@ -92,9 +95,8 @@ const AdminOrders = () => {
         filtered.sort((a, b) => a.totalPrice - b.totalPrice);
         break;
       default:
-        // newest
         filtered.sort(
-          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
         break;
     }
@@ -112,7 +114,7 @@ const AdminOrders = () => {
 
   const totalOrders = orders.length;
   const deliveredOrders = orders.filter((o) => o.isDelivered).length;
-  const pendingOrders = totalOrders - deliveredOrders;
+  const pendingOrders = orders.filter( (o) => !o.isDelivered && !o.isCanceled).length;
 
   return (
     <div className="container py-4">
@@ -186,8 +188,10 @@ const AdminOrders = () => {
               <option value="delivered">Delivered</option>
               <option value="pending">Pending</option>
               <option value="assigned">Assigned</option>
+              <option value="cancelled">Cancelled</option>
             </select>
           </div>
+
           <div className="col-md-6 d-flex align-items-center gap-2">
             <ArrowUpDown size={18} className="text-secondary" />
             <select
@@ -213,18 +217,20 @@ const AdminOrders = () => {
                 <th>Customer</th>
                 <th>Total</th>
                 <th className="text-center">Payment</th>
-                <th className="text-center">Delivered</th>
+                <th className="text-center">Status</th>
                 <th className="text-center">Delivery Partner</th>
                 <th className="text-center">Action</th>
               </tr>
             </thead>
+
             <tbody>
               {filteredOrders.length > 0 ? (
                 filteredOrders.map((order) => {
                   const isAssigned = !!order.assignedTo;
 
                   return (
-                    <tr key={order._id}>
+                      <tr className={order.isCanceled ? "cancelled-row" : ""}>
+
                       {/* Customer */}
                       <td className="d-flex align-items-center gap-2">
                         <User size={16} className="text-secondary" />
@@ -252,32 +258,51 @@ const AdminOrders = () => {
                         )}
                       </td>
 
-                      {/* Delivered */}
+                      {/* Status */}
                       <td className="text-center">
-                        {order.isDelivered ? (
-                          <span className="badge bg-success d-flex justify-content-center align-items-center gap-1">
-                            <CheckCircle size={14} />
-                            Delivered
-                          </span>
+                        {order.isCanceled ? (
+                          <div className="d-flex justify-content-center align-items-center gap-1">
+                            <span className="badge bg-danger">Cancelled</span>
+
+                            {/* Tooltip Reason */}
+                            <span
+                              title={order.cancelReason || "No reason given"}
+                              style={{
+                                cursor: "pointer",
+                                color: "#dc3545",
+                                fontWeight: "bold",
+                                fontSize: "14px",
+                              }}
+                            >
+                              ⓘ
+                            </span>
+                          </div>
+                        ) : order.isDelivered ? (
+                          <span className="badge bg-success">Delivered</span>
                         ) : (
-                          <span className="badge bg-danger d-flex justify-content-center align-items-center gap-1">
-                            <XCircle size={14} />
-                            Pending
-                          </span>
+                          <span className="badge bg-danger">Pending</span>
                         )}
                       </td>
 
-                      {/* Partner */}
+                      {/* Delivery Partner */}
                       <td className="text-center">
                         {isAssigned ? (
                           <div className="d-flex justify-content-center align-items-center gap-2 text-muted">
-                            <span>{order.assignedTo?.name || "Assigned"}</span>
+                            <span>
+                              {order.assignedTo?.name || "Assigned"}
+                            </span>
                             <Lock size={16} className="text-secondary" />
                           </div>
+                        ) : order.isCanceled ? (
+                          <span className="text-danger small fw-bold">
+                            Cancelled
+                          </span>
                         ) : (
                           <select
                             value={order.assignedTo?._id || ""}
-                            onChange={(e) => handleAssign(order._id, e.target.value)}
+                            onChange={(e) =>
+                              handleAssign(order._id, e.target.value)
+                            }
                             className="form-select form-select-sm"
                           >
                             <option value="">-- Assign --</option>
@@ -290,14 +315,14 @@ const AdminOrders = () => {
                         )}
                       </td>
 
-                      {/* Refresh */}
+                      {/* Action */}
                       <td className="text-center">
                         <button
                           onClick={loadData}
                           className="btn btn-outline-primary btn-sm rounded-circle"
                           title="Refresh"
                         >
-                            <RefreshCw size={16} />
+                          <RefreshCw size={16} />
                         </button>
                       </td>
                     </tr>

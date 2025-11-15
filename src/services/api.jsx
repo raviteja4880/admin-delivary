@@ -29,48 +29,18 @@ export const authAPI = {
   updateProfile: (data) => API.put("/auth/profile", data),
 };
 
-// ================= PRODUCTS API =================
-export const productAPI = {
-  getAll: () => API.get("/products"),
-  getById: (id) => API.get(`/products/${id}`),
-  create: (payload) => API.post("/products", payload),
-  update: (id, payload) => API.put(`/products/${id}`, payload),
-  delete: (id) => API.delete(`/products/${id}`),
-  sync: () => API.post("/products/sync"),
-};
-
-// ================= CART API =================
-export const cartAPI = {
-  get: () => API.get("/cart"),
-  add: (productId, qty = 1) => API.post("/cart/add", { productId, qty }),
-  update: (productId, qty) => API.put(`/cart/${productId}`, { qty }),
-  remove: (productId) => API.delete(`/cart/${productId}`),
-  clear: () => API.delete("/cart"),
-};
-
-// ================= ORDERS API =================
-export const orderAPI = {
-  create: (orderData) => API.post("/orders", orderData),
-  getMyOrders: () => API.get("/orders/my"),
-  getById: (id) => API.get(`/orders/${id}`),
-  pay: (id, paymentResult) => API.put(`/orders/${id}/pay`, paymentResult),
-  verifyPayment: (id) => API.get(`/orders/${id}/verify-payment`),
-};
-
-// ================= PAYMENT API =================
-export const paymentAPI = {
-  initiate: (payload) => API.post("/payment/initiate", payload),
-  verify: (orderId) => API.post(`/payment/verify/${orderId}`),
-  confirm: (orderId) => API.post(`/payment/confirm/${orderId}`),
-};
-
 // ================= ADMIN API =================
 export const adminAPI = {
   getAllOrders: () => API.get("/admin/orders"),
-  assignDelivery: (orderId, deliveryPartnerId) =>
-    API.put(`/admin/orders/${orderId}/assign`, { deliveryPartnerId }),
+  assignDelivery: (orderId, deliveryPartnerId) => API.put(`/admin/orders/${orderId}/assign`, { deliveryPartnerId }),
   getDeliveryPartners: () => API.get("/admin/delivery"),
-  addDeliveryPartner: (payload) => API.post("/admin/delivery", payload),
+  updateInventory: (id, payload) => API.put(`/admin/inventory/${id}`, payload),
+  addProduct: (formData) =>API.post("/admin/products", formData, { headers: { "Content-Type": "multipart/form-data" },}),
+};
+
+// ----------------- Super Admin API -----------------
+export const superAdminAPI = {
+  getAnalytics: () => API.get("/admin/superadmin/analytics"),
 };
 
 // ================= DELIVERY API =================

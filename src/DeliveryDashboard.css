@@ -54,3 +54,12 @@
   }
 }
 }
+
+table td, table th {
+  vertical-align: middle !important;
+  white-space: nowrap;
+}
+
+.address-text {
+  white-space: normal !important;
+}

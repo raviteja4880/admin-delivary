@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { User, LogOut, Truck, BarChart3, PackageSearch, UserCircle } from "lucide-react";
+import {
+  User,
+  LogOut,
+  Truck,
+  BarChart3,
+  PackageSearch,
+  UserCircle,
+  PlusSquare,
+} from "lucide-react";
 
 const DashboardNavbar = () => {
   const navigate = useNavigate();
@@ -26,21 +34,56 @@ const DashboardNavbar = () => {
     navigate("/");
   };
 
-  // Role-based links
   const role = userInfo?.role;
 
-  const navLinks =
+ // ================= ROLE-BASED NAV LINKS =================
+const navLinks =
+  role === "admin"
+    ? [
+        {
+          to: "/admin/dashboard",
+          label: "Manage Orders",
+          icon: <PackageSearch size={18} />,
+        },
+        {
+          to: "/admin/add-product",
+          label: "Add Product",
+          icon: <PlusSquare size={18} />, 
+        },
+      ]
+    : role === "superadmin"
+    ? [
+        {
+          to: "/superadmin/analytics",
+          label: "Analytics Overview",
+          icon: <BarChart3 size={18} />,
+        },
+      ]
+    : role === "delivery"
+    ? [
+        {
+          to: "/delivery/dashboard",
+          label: "My Deliveries",
+          icon: <Truck size={18} />,
+        },
+        {
+          to: "/delivery/analytics",
+          label: "Delivery Analytics",
+          icon: <BarChart3 size={18} />,
+        },
+      ]
+    : [];
+
+
+  // ================= BRAND REDIRECT BASED ON ROLE =================
+  const brandLink =
     role === "admin"
-      ? [
-          { to: "/admin/analytics", label: "Analytics", icon: <BarChart3 size={18} /> },
-          { to: "/admin/dashboard", label: "Orders", icon: <PackageSearch size={18} /> },
-        ]
+      ? "/admin/dashboard"
+      : role === "superadmin"
+      ? "/superadmin/analytics"
       : role === "delivery"
-      ? [
-          { to: "/delivery/analytics", label: "Analytics", icon: <BarChart3 size={18} /> },
-          { to: "/delivery/dashboard", label: "Deliveries", icon: <Truck size={18} /> },
-        ]
-      : [];
+      ? "/delivery/dashboard"
+      : "/";
 
   return (
     <nav
@@ -54,13 +97,7 @@ const DashboardNavbar = () => {
       <div className="container">
         {/* === Brand === */}
         <Link
-          to={
-            role === "admin"
-              ? "/admin/analytics"
-              : role === "delivery"
-              ? "/delivery/analytics"
-              : "/profile"
-          }
+          to={brandLink}
           className="navbar-brand fw-bold text-primary"
           style={{ fontSize: "1.4rem", letterSpacing: "0.5px" }}
         >
@@ -78,7 +115,10 @@ const DashboardNavbar = () => {
         </button>
 
         {/* === Nav Links (aligned right) === */}
-        <div className="collapse navbar-collapse justify-content-end" id="dashboardNav">
+        <div
+          className="collapse navbar-collapse justify-content-end"
+          id="dashboardNav"
+        >
           <ul className="navbar-nav align-items-lg-center gap-lg-3">
             {navLinks.map((link) => (
               <li key={link.to} className="nav-item">
@@ -89,7 +129,9 @@ const DashboardNavbar = () => {
                     color: "#333",
                     transition: "color 0.2s ease-in-out",
                   }}
-                  onMouseOver={(e) => (e.currentTarget.style.color = "#0d6efd")}
+                  onMouseOver={(e) =>
+                    (e.currentTarget.style.color = "#0d6efd")
+                  }
                   onMouseOut={(e) => (e.currentTarget.style.color = "#333")}
                 >
                   {link.icon}
@@ -131,7 +173,11 @@ const DashboardNavbar = () => {
                       <div className="text-muted small">{userInfo.email}</div>
                       <div
                         className={`badge mt-1 ${
-                          role === "admin" ? "bg-primary" : "bg-success"
+                          role === "superadmin"
+                            ? "bg-dark"
+                            : role === "admin"
+                            ? "bg-primary"
+                            : "bg-success"
                         }`}
                       >
                         {role?.toUpperCase()}

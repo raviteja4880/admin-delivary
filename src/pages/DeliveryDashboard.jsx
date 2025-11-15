@@ -245,7 +245,7 @@ const DeliveryDashboard = () => {
 
       {/* ORDERS TABLE */}
       <div className="card shadow-sm border-0">
-        <div className="table-responsive">
+        <div className="d-none d-md-block">
           <table className="table align-middle table-hover table-bordered mb-0">
             <thead className="table-light">
               <tr>
@@ -415,10 +415,84 @@ const DeliveryDashboard = () => {
                 </tr>
               )}
             </tbody>
-
           </table>
+        
         </div>
       </div>
+      {/* MOBILE CARD VIEW */}
+<div className="d-md-none">
+  {filteredOrders.map((order) => (
+    <div key={order._id} className="card mb-3 p-3 shadow-sm">
+
+      {/* Name + Phone */}
+      <div className="d-flex align-items-center gap-2 mb-2">
+        <User size={18} className="text-secondary" />
+        <strong>{order.user?.name}</strong>
+      </div>
+
+      <div className="text-muted small mb-2">
+        <Phone size={14} /> {order.mobile}
+      </div>
+
+      {/* Address */}
+      <div className="mb-2 small">
+        <MapPin size={14} className="text-muted" /> {order.shippingAddress}
+        <br />
+        <a
+          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.shippingAddress)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary small"
+        >
+          View on Maps →
+        </a>
+      </div>
+
+      {/* Total */}
+      <p className="fw-bold mb-2">
+        <IndianRupee size={14} /> {order.totalPrice}
+      </p>
+
+      {/* Payment */}
+<div className="mb-2">
+  {order.paymentMethod === "COD" ? (
+    order.isPaid ? (
+      <span className="badge bg-success">Paid (COD)</span>
+    ) : (
+      <button
+        onClick={() => markPaid(order._id)}
+        disabled={updatingId === order._id}
+        className="btn btn-sm btn-warning d-flex align-items-center gap-1"
+      >
+        <Wallet size={16} />
+        {updatingId === order._id ? "Updating..." : "Mark as Paid"}
+      </button>
+    )
+  ) : order.isPaid ? (
+    <span className="badge bg-success">Paid</span>
+  ) : (
+    <span className="badge bg-danger">Unpaid</span>
+  )}
+</div>
+
+      {/* Action - Delivered Button */}
+      <div>
+        {order.isDelivered ? (
+          <span className="text-success fw-bold">Delivered</span>
+        ) : (
+          <button
+            className="btn btn-success btn-sm"
+            onClick={() => markDelivered(order._id)}
+            disabled={!order.isPaid}
+          >
+            Mark Delivered
+          </button>
+        )}
+      </div>
+    </div>
+  ))}
+</div>
+
     </div>
   );
 };
