@@ -18,12 +18,12 @@ const AdminAddProduct = () => {
   const [isDragging, setIsDragging] = useState(false);
 
   const categories = [
-    "Men's Clothing",
-    "Women's Clothing",
-    "Electronics",
-    "Jewelry",
-    "Footwear",
-    "Accessories",
+    "men's clothing",
+    "women's clothing",
+    "electronics",
+    "jewelery",
+    "footwear",
+    "accessories",
   ];
 
   const handleChange = (e) => {

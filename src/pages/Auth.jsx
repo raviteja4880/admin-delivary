@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { authAPI } from "../services/api";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { ShieldCheck, Truck, Users, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 import "../AuthLanding.css";
 
 const AuthLanding = () => {
@@ -105,7 +105,7 @@ const AuthLanding = () => {
         transition={{ duration: 0.7 }}
       >
         <Lock size={48} className="mb-3 text-light opacity-90" />
-        <h1 className="display-6 fw-bold mb-2">TejaCommerce Control Center</h1>
+        <h1 className="display-6 fw-bold mb-2">My Store Control Center</h1>
         <p className="fs-5 text-light opacity-75 mb-4">
           Manage operations, orders, and delivery seamlessly in one platform.
         </p>
@@ -296,43 +296,10 @@ const AuthLanding = () => {
           </p>
         </motion.div>
       </AnimatePresence>
-
-      {/* ===== INFO SECTION ===== */}
-      <section className="info-section text-center mt-5 px-3">
-        <h3 className="fw-bold mb-4">Why Choose TejaCommerce</h3>
-        <div className="row justify-content-center">
-          <div className="col-md-3 col-10 mb-4">
-            <div className="info-card p-4 shadow-sm rounded-4">
-              <Truck size={36} className="text-primary mb-3" />
-              <h5 className="fw-semibold">Efficient Deliveries</h5>
-              <p className="text-muted small">
-                Manage and track deliveries in real time for faster fulfillment.
-              </p>
-            </div>
-          </div>
-          <div className="col-md-3 col-10 mb-4">
-            <div className="info-card p-4 shadow-sm rounded-4">
-              <ShieldCheck size={36} className="text-success mb-3" />
-              <h5 className="fw-semibold">Secure Access</h5>
-              <p className="text-muted small">
-                Protected authentication for admins and partners.
-              </p>
-            </div>
-          </div>
-          <div className="col-md-3 col-10 mb-4">
-            <div className="info-card p-4 shadow-sm rounded-4">
-              <Users size={36} className="text-warning mb-3" />
-              <h5 className="fw-semibold">Role Management</h5>
-              <p className="text-muted small">
-                Manage Admins, Super Admins, and Delivery Partners efficiently.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
+      
+      {/* ===== FOOTER ===== */}
       <footer className="text-center mt-5 mb-3 text-light opacity-75">
-        © {new Date().getFullYear()} TejaCommerce Control Center. All rights reserved.
+        © {new Date().getFullYear()} My Store | All Rights Reserved.
       </footer>
     </div>
   );

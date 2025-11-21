@@ -38,7 +38,7 @@ const SuperAdminAnalytics = () => {
   const loadOrders = async () => {
     try {
       const { data } = await superAdminAPI.getAnalytics();
-      setOrders(data.recentOrders || []);
+      setOrders(data.allOrders || []);
     } catch (error) {
       console.error("Analytics Load Error:", error);
     } finally {
@@ -115,7 +115,7 @@ const SuperAdminAnalytics = () => {
                 <div>
                   <p className="text-muted mb-1">Total Income</p>
                   <h4 className="fw-bold">
-                    <IndianRupee size={16} /> {totalIncome.toFixed(2)}
+                    <IndianRupee size={16} /> {totalIncome.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                   </h4>
                 </div>
                 <IndianRupee size={36} className="text-primary" />
