@@ -20,40 +20,50 @@ const AuthLanding = () => {
   });
 
   // ================= LOGIN =================
+  if (loading) return;
+
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const { data } = await authAPI.login({
-        email: formData.email,
-        password: formData.password,
-      });
+  localStorage.removeItem("token");
+  localStorage.removeItem("userInfo");
 
-      localStorage.setItem("userInfo", JSON.stringify(data.user || data));
-      localStorage.setItem("token", data.token);
+  try {
+    const { data } = await authAPI.login({
+      email: formData.email,
+      password: formData.password,
+    });
 
-      const userRole = data.user?.role || data.role;
+    const user = data.user;
+    const token = data.token;
 
-      if (userRole === "superadmin") {
-        navigate("/superadmin/analytics");
-        toast.success("Welcome Super Admin");
-      } else if (userRole === "admin") {
-        navigate("/admin/dashboard");
-        toast.success("Welcome Admin");
-      } else if (userRole === "delivery") {
-        navigate("/delivery/dashboard");
-        toast.success("Welcome Delivery Partner");
-      } else {
-        toast.error("Access denied — only Admin, Super Admin, or Delivery can log in.");
-      }
-    } catch (err) {
-      console.error("Login error:", err);
-      toast.error(err.response?.data?.message || "Invalid credentials.");
-    } finally {
+    if (!["superadmin", "admin", "delivery"].includes(user.role)) {
+      toast.error("Access denied — unauthorized role.");
       setLoading(false);
+      return;
     }
-  };
+
+    localStorage.setItem("userInfo", JSON.stringify(user));
+    localStorage.setItem("token", token);
+
+    if (user.role === "superadmin") {
+      navigate("/superadmin/analytics");
+      toast.success("Welcome Super Admin");
+    } else if (user.role === "admin") {
+      navigate("/admin/dashboard");
+      toast.success("Welcome Admin");
+    } else if (user.role === "delivery") {
+      navigate("/delivery/dashboard");
+      toast.success("Welcome Delivery Partner");
+    }
+  } catch (err) {
+    console.error("Login error:", err);
+    toast.error(err.response?.data?.message || "Invalid credentials.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ================= REGISTER =================
   const handleRegister = async (e) => {

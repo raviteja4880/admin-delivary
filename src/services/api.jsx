@@ -10,16 +10,30 @@ const API = axios.create({
 });
 
 // ----------------- Attach JWT token automatically -----------------
-API.interceptors.request.use((req) => {
-  try {
-    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-    const token = userInfo?.token;
-    if (token) req.headers.Authorization = `Bearer ${token}`;
-  } catch {
-    console.warn("Invalid userInfo in localStorage");
+API.interceptors.request.use(
+  (req) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      req.headers.Authorization = `Bearer ${token}`;
+    }
+    return req;
+  },
+  (error) => Promise.reject(error)
+);
+
+// ----------------- Global Response Handling -----------------
+API.interceptors.response.use(
+  (res) => res,
+  (err) => {
+  if (err.response?.status === 401) {
+    if (window.location.pathname !== "/") {
+      localStorage.clear();
+      window.location.href = "/";
+    }
   }
-  return req;
-});
+    return Promise.reject(err);
+  }
+);
 
 // ================= AUTH API =================
 export const authAPI = {
